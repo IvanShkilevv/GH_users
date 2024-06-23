@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace 'com.example.ghusers'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.ghusers"
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -88,7 +88,7 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     // Navigation
-    implementation "ru.terrakok.cicerone:cicerone:5.0.0"
+    implementation "com.github.terrakok:cicerone:7.1"
 
     // Logs
 //    TODO clean up
