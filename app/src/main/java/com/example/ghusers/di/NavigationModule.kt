@@ -18,4 +18,10 @@ class NavigationModule {
         return cicerone.router
     }
 
+    @Provides
+    @Singleton
+    fun providesNavigatorHolder(): NavigatorHolder {
+        return cicerone.getNavigatorHolder()
+    }
+
 }

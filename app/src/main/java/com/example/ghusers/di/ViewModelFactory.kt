@@ -2,6 +2,7 @@ package com.example.ghusers.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.ghusers.ui.users.UsersViewModel
 
 import dagger.Binds
 import dagger.MapKey
@@ -35,10 +36,9 @@ abstract class ViewModelModule {
     @Binds
     internal abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory
 
-//    TODO
-//    @Binds
-//    @IntoMap
-//    @ViewModelKey(MainViewModel::class)
-//    internal abstract fun mainViewModel(viewModel: MainViewModel): ViewModel
+    @Binds
+    @IntoMap
+    @ViewModelKey(UsersViewModel::class)
+    internal abstract fun usersViewModel(viewModel: UsersViewModel): ViewModel
 
 }
