@@ -11,6 +11,8 @@ import javax.inject.Inject
 
 abstract class BaseActivity : FragmentActivity() {
 
+    abstract fun getFragmentContainerId(): Int
+
     @Inject
     lateinit var router: Router
 
@@ -34,7 +36,5 @@ abstract class BaseActivity : FragmentActivity() {
         super.onPause()
         navigatorHolder.removeNavigator()
     }
-
-    abstract fun getFragmentContainerId(): Int
 
 }

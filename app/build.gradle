@@ -55,7 +55,6 @@ dependencies {
 
     //  Android
     implementation 'androidx.core:core-ktx:1.13.1'
-    //    TODO clean up
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.2'
 
     // Compose
@@ -69,6 +68,8 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.8.2"
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Kotlin Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_android_version"
