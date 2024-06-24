@@ -12,11 +12,11 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import java.util.NoSuchElementException
 import javax.inject.Inject
 
+// NOTICE: 403 exception may happen after several requests. Try other device then
 class UsersViewModel @Inject constructor(
     private val usersInteractor: UsersInteractor
 ) : BaseViewModel() {
@@ -48,7 +48,7 @@ class UsersViewModel @Inject constructor(
     private fun loadUsers(sinceID: Int): Deferred<List<User>> {
         val deferred = viewModelScope.async {
 //            delay added for a better testing PullToRefresh and ProgressIndicator
-//            delay(1000)
+            delay(1000)
             usersInteractor.loadUsersPage(sinceID)
         }
 

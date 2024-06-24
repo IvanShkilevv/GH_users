@@ -13,10 +13,6 @@ class UsersInteractor @Inject constructor(
         return usersService.getUsers(since = pageSinceID, perPage = PAGE_SIZE)
     }
 
-//    suspend fun loadUsers(): List<User> {
-//        return usersService.getUsers()
-//    }
-
     suspend fun loadUserDetails(login: String): User {
         return usersService.getUserDetails(login)
     }

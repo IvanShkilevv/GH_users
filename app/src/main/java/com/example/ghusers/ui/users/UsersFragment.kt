@@ -1,6 +1,5 @@
 package com.example.ghusers.ui.users
 
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -54,9 +51,7 @@ import com.example.ghusers.data.model.User
 import com.example.ghusers.navigation.Screens
 import com.example.ghusers.ui.composables.ErrorFullSize
 import com.example.ghusers.ui.composables.FullScreenLoading
-import com.kevinnzou.compose.core.paginglist.easylist.PagingLazyColumn
 import com.kevinnzou.compose.core.paginglist.widget.PagingListContainer
-import com.kevinnzou.compose.core.paginglist.widget.itemPaging
 import kotlinx.coroutines.Deferred
 
 class UsersFragment : BaseFragment() {
@@ -85,11 +80,6 @@ class UsersFragment : BaseFragment() {
         navigateTo(Screens.userDetails(user.login))
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewModel.refreshUsers()
-    }
-
 }
 
 enum class UsersUiState {
@@ -99,7 +89,6 @@ enum class UsersUiState {
 @Composable
 fun UsersScreen(viewModel: UsersViewModel, onItemClick: (User) -> Unit) {
     val state: UsersUiState by viewModel.uiState
-//    val data: State<List<User>> = viewModel.usersData.collectAsStateWithLifecycle()
     val pagerData = viewModel.pager.collectAsLazyPagingItems()
 
     when (state) {
