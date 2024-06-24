@@ -28,6 +28,7 @@ import androidx.lifecycle.ViewModelProvider
 import coil.compose.AsyncImage
 import com.example.ghusers.data.model.User
 import com.example.ghusers.ui.base.BaseFragment
+import com.example.ghusers.ui.composables.ErrorFullSize
 import com.example.ghusers.ui.composables.FullScreenLoading
 import com.example.ghusers.ui.theme.GHUsersTheme
 import com.example.ghusers.ui.users.UserItem
@@ -85,8 +86,7 @@ fun UserDetailsScreen(viewModel: UserDetailsViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
 
-//        TODO refactor
-        UserDetailsUiState.ERROR -> FullScreenLoading()
+        UserDetailsUiState.ERROR -> ErrorFullSize()
     }
 
 }

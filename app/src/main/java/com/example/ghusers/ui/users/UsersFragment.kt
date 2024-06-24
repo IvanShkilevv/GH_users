@@ -52,6 +52,7 @@ import androidx.paging.compose.itemsIndexed
 import coil.compose.AsyncImage
 import com.example.ghusers.data.model.User
 import com.example.ghusers.navigation.Screens
+import com.example.ghusers.ui.composables.ErrorFullSize
 import com.example.ghusers.ui.composables.FullScreenLoading
 import com.kevinnzou.compose.core.paginglist.easylist.PagingLazyColumn
 import com.kevinnzou.compose.core.paginglist.widget.PagingListContainer
@@ -110,8 +111,7 @@ fun UsersScreen(viewModel: UsersViewModel, onItemClick: (User) -> Unit) {
             onItemClick = onItemClick
         )
 
-        //        TODO refactor
-        UsersUiState.ERROR -> FullScreenLoading()
+        UsersUiState.ERROR -> ErrorFullSize()
     }
 
 }

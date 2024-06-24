@@ -22,7 +22,7 @@ class UsersViewModel @Inject constructor(
 ) : BaseViewModel() {
 
     val pager = easyPager {
-        loadDataPage(it)
+        loadDataPage()
     }
 
     val uiState = mutableStateOf(UsersUiState.LOADING)
@@ -34,7 +34,7 @@ class UsersViewModel @Inject constructor(
         return loadUsers(defaultPageSinceID)
     }
 
-    private suspend fun loadDataPage(page: Int): PagingListWrapper<User> {
+    private suspend fun loadDataPage(): PagingListWrapper<User> {
         val pageSinceID = try {
             usersData.value.last().id
         } catch (e: NoSuchElementException) {
@@ -48,7 +48,7 @@ class UsersViewModel @Inject constructor(
     private fun loadUsers(sinceID: Int): Deferred<List<User>> {
         val deferred = viewModelScope.async {
 //            delay added for a better testing PullToRefresh and ProgressIndicator
-            delay(1000)
+//            delay(1000)
             usersInteractor.loadUsersPage(sinceID)
         }
 
@@ -64,25 +64,5 @@ class UsersViewModel @Inject constructor(
 
         return deferred
     }
-
-//    fun loadUsers(): Deferred<List<User>> {
-//        val deferred = viewModelScope.async {
-////            delay added for a better testing PullToRefresh and ProgressIndicator
-//            delay(1500)
-//            usersInteractor.loadUsers()
-//        }
-//
-//        viewModelScope.launch {
-//            try {
-//                val items = deferred.await()
-//                usersData.value = items
-//                uiState.value = UsersUiState.DATA
-//            } catch (error: Throwable) {
-//                if (error is CancellationException) throw error else uiState.value = UsersUiState.ERROR
-//            }
-//        }
-//
-//        return deferred
-//    }
 
 }
