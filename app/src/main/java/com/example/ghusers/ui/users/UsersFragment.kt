@@ -1,9 +1,11 @@
 package com.example.ghusers.ui.users
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,6 +47,8 @@ import com.example.ghusers.data.model.User
 
 class UsersFragment: BaseFragment() {
 
+    private lateinit var viewModel: UsersViewModel
+
     companion object {
         fun newInstance(): UsersFragment {
             return UsersFragment()
@@ -52,7 +56,7 @@ class UsersFragment: BaseFragment() {
     }
 
     override fun getRootView(inflater: LayoutInflater, container: ViewGroup?): View {
-        val viewModel = ViewModelProvider(this, viewModelFactory)[UsersViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[UsersViewModel::class.java]
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -66,10 +70,15 @@ class UsersFragment: BaseFragment() {
 
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.loadUsers()
+    }
+
 }
 
 enum class UsersUiState {
-    LOADING, REFRESHING, LIST
+    LOADING, REFRESHING, LIST, ERROR
 }
 
 @Composable
@@ -79,9 +88,14 @@ fun UsersScreen(viewModel: UsersViewModel, modifier: Modifier = Modifier) {
 
     when(state) {
         UsersUiState.LOADING -> FullScreenLoading()
-//        TODO
+
+//        TODO refactor
         UsersUiState.REFRESHING -> FullScreenLoading()
+
         UsersUiState.LIST -> UsersColumn(data, modifier = Modifier.fillMaxWidth())
+
+        //        TODO refactor
+        UsersUiState.ERROR -> FullScreenLoading()
     }
 
 }
@@ -94,9 +108,10 @@ fun UsersColumn(
     val state = rememberLazyListState()
 
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.padding(top = 20.dp, bottom = 20.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         state = state
     ) {
         items(items = data.value) { itemData: User ->

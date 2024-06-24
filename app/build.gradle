@@ -78,8 +78,6 @@ dependencies {
     // Network
     implementation "com.squareup.retrofit2:retrofit:${retrofitVersion}"
     implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
-//    TODO clean up
-//    implementation "com.squareup.okhttp3:logging-interceptor:4.4.0"
     implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
 
     // Dagger 2
@@ -90,9 +88,5 @@ dependencies {
 
     // Navigation
     implementation "com.github.terrakok:cicerone:7.1"
-
-    // Logs
-//    TODO clean up
-    implementation "com.jakewharton.timber:timber:4.7.1"
 
 }
