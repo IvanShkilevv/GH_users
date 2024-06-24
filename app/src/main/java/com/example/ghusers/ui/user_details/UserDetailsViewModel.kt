@@ -1,43 +1,42 @@
-package com.example.ghusers.ui.users
+package com.example.ghusers.ui.user_details
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.ghusers.data.model.User
 import com.example.ghusers.domain.UsersInteractor
 import com.example.ghusers.ui.base.BaseViewModel
+import com.example.ghusers.ui.users.UsersUiState
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class UsersViewModel @Inject constructor(
+class UserDetailsViewModel @Inject constructor(
     private val usersInteractor: UsersInteractor
 ) : BaseViewModel() {
 
-    val uiState = mutableStateOf(UsersUiState.LOADING)
-    val usersData = MutableStateFlow<List<User>>(emptyList())
+    var userLogin: String = ""
+    val uiState = mutableStateOf(UserDetailsUiState.LOADING)
+    val userDetailsData = MutableLiveData<User>()
 
-    fun loadUsers(): Deferred<List<User>> {
+    fun loadUserDetails() {
         val deferred = viewModelScope.async {
 //            delay added for a better testing PullToRefresh and ProgressIndicator
             delay(1500)
-            usersInteractor.loadUsers()
+            usersInteractor.loadUserDetails(userLogin)
         }
 
         viewModelScope.launch {
             try {
-                val items = deferred.await()
-                usersData.value = items
-                uiState.value = UsersUiState.DATA
+                val result = deferred.await()
+                userDetailsData.value = result
+                uiState.value = UserDetailsUiState.DATA
             } catch (error: Throwable) {
-                if (error is CancellationException) throw error else uiState.value = UsersUiState.ERROR
+                if (error is CancellationException) throw error else uiState.value = UserDetailsUiState.ERROR
             }
         }
-
-        return deferred
     }
 
 }

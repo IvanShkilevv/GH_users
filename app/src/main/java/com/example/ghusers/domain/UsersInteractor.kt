@@ -12,4 +12,8 @@ class UsersInteractor @Inject constructor(
         return usersService.getUsers()
     }
 
+    suspend fun loadUserDetails(login: String): User {
+        return usersService.getUserDetails(login)
+    }
+
 }

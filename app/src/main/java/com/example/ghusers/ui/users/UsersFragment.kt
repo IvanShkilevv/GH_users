@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
@@ -19,6 +22,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,17 +42,22 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.ghusers.ui.base.BaseFragment
 import com.example.ghusers.ui.theme.GHUsersTheme
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.ghusers.data.model.User
+import com.example.ghusers.navigation.Screens
+import com.example.ghusers.ui.composables.FullScreenLoading
+import kotlinx.coroutines.Deferred
 
-class UsersFragment: BaseFragment() {
+class UsersFragment : BaseFragment() {
 
     private lateinit var viewModel: UsersViewModel
 
@@ -61,13 +73,14 @@ class UsersFragment: BaseFragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                UsersScreen(
-                    viewModel = viewModel,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                UsersScreen(viewModel = viewModel, ::navigateToUserDetails)
             }
         }
 
+    }
+
+    private fun navigateToUserDetails(user: User) {
+        navigateTo(Screens.userDetails(user.login))
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,21 +91,22 @@ class UsersFragment: BaseFragment() {
 }
 
 enum class UsersUiState {
-    LOADING, REFRESHING, LIST, ERROR
+    LOADING, DATA, ERROR
 }
 
 @Composable
-fun UsersScreen(viewModel: UsersViewModel, modifier: Modifier = Modifier) {
+fun UsersScreen(viewModel: UsersViewModel, onItemClick: (User) -> Unit) {
     val state: UsersUiState by viewModel.uiState
     val data: State<List<User>> = viewModel.usersData.collectAsStateWithLifecycle()
 
-    when(state) {
+    when (state) {
         UsersUiState.LOADING -> FullScreenLoading()
-
-//        TODO refactor
-        UsersUiState.REFRESHING -> FullScreenLoading()
-
-        UsersUiState.LIST -> UsersColumn(data, modifier = Modifier.fillMaxWidth())
+        UsersUiState.DATA -> UsersColumn(
+            data,
+            modifier = Modifier.fillMaxWidth(),
+            refreshData = viewModel::loadUsers,
+            onItemClick = onItemClick
+        )
 
         //        TODO refactor
         UsersUiState.ERROR -> FullScreenLoading()
@@ -100,35 +114,61 @@ fun UsersScreen(viewModel: UsersViewModel, modifier: Modifier = Modifier) {
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UsersColumn(
     data: State<List<User>>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    refreshData: () -> Deferred<List<User>>,
+    onItemClick: (User) -> Unit
 ) {
-    val state = rememberLazyListState()
+    val listState = rememberLazyListState()
+    val refreshScope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
 
-    LazyColumn(
-        modifier = modifier.padding(top = 20.dp, bottom = 20.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        state = state
-    ) {
-        items(items = data.value) { itemData: User ->
-            UserItem(itemData)
+    fun refreshInternal() = refreshScope.launch {
+        isRefreshing = true
+        val deferred = refreshData()
+        deferred.await()
+        isRefreshing = false
+    }
+
+    val pullRefreshState = rememberPullRefreshState(isRefreshing, ::refreshInternal)
+
+    Box(modifier.pullRefresh(pullRefreshState)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            state = listState
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+            items(items = data.value) { itemData: User ->
+                UserItem(data = itemData, onItemClick = onItemClick)
+            }
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
         }
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
 @Composable
-fun UsersScreenPreview() {
-//    GHUsersTheme { UsersScreen() }
-}
-
-@Composable
-fun UserItem(data: User) {
-    Row(modifier = Modifier.fillMaxWidth()) {
+fun UserItem(data: User, modifier: Modifier = Modifier, onItemClick: (User) -> Unit) {
+    Row(modifier =
+    modifier
+        .fillMaxWidth()
+        .clickable { onItemClick(data) }
+    ) {
         AsyncImage(
             model = data.avatarUrl,
             contentDescription = null,
@@ -138,14 +178,16 @@ fun UserItem(data: User) {
             contentScale = ContentScale.Crop
         )
         Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)) {
-            Text(text = data.login ?: "",
+            Text(
+                text = data.login ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.paddingFromBaseline(bottom = 5.dp)
             )
 
-            Text(text = data.id,
+            Text(
+                text = data.id,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -157,30 +199,11 @@ fun UserItem(data: User) {
 @Preview(widthDp = 360, showBackground = true, backgroundColor = 0xFFF5F0EE)
 @Composable
 fun UserItemPreview() {
-    val dummyUser = User(id = "subtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", login = "title", avatarUrl = "https://www.drcommodore.it/wp-content/uploads/2022/02/233b624e43a04fe9bfd43ef00ebcb2c9.jpg")
-    GHUsersTheme { UserItem(dummyUser) }
-}
-
-@Composable
-fun FullScreenLoading() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.LightGray)
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier.align(Alignment.Center),
-            color = Color.Blue,
-            strokeWidth = 4.dp
-        )
-    }
-}
-
-@Preview(widthDp = 360, heightDp = 720, showBackground = true)
-@Composable
-fun FullScreenLoadingPreview() {
-    GHUsersTheme {
-        FullScreenLoading()
-    }
+    val dummyUser = User(
+        id = "subtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        login = "title",
+        avatarUrl = "https://www.drcommodore.it/wp-content/uploads/2022/02/233b624e43a04fe9bfd43ef00ebcb2c9.jpg"
+    )
+    GHUsersTheme { UserItem(data = dummyUser, onItemClick = {}) }
 }
 
