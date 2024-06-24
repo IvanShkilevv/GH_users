@@ -73,6 +73,9 @@ dependencies {
     implementation "androidx.compose.material:material:1.7.0-beta03"
     implementation("androidx.compose.runtime:runtime-livedata:1.6.8")
 
+//  Paging
+    implementation("io.github.kevinnzou:compose-paginglist:1.1.0")
+
     // Kotlin Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_android_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_android_version"

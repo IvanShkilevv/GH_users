@@ -3,7 +3,7 @@ package com.example.ghusers.data.model
 import com.google.gson.annotations.SerializedName
 
 class User(
-    val id: String,
+    val id: Int,
     val login: String?,
     @SerializedName("avatar_url")
     val avatarUrl: String?,
@@ -21,7 +21,7 @@ class User(
     @SerializedName("created_at")
     val creationDate: String?
 ) {
-    constructor(id: String, login: String, avatarUrl: String) : this(
+    constructor(id: Int, login: String, avatarUrl: String) : this(
         id,
         login,
         avatarUrl,

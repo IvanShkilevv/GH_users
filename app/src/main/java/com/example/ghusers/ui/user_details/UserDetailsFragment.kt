@@ -119,7 +119,7 @@ fun UserInfo(data: State<User?>, modifier: Modifier = Modifier) {
 @Composable
 fun UserInfoPreview() {
     val dummyUser = User(
-        id = "subtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        id = 1,
         login = "title",
         avatarUrl = "https://www.drcommodore.it/wp-content/uploads/2022/02/233b624e43a04fe9bfd43ef00ebcb2c9.jpg"
     )
